@@ -1,0 +1,12 @@
+"Application_Type","Count","Avg_Signal","Avg_Latency","Avg_Required_BW","Avg_Allocated_BW","Avg_Resource"
+"Video_Call",58,-63.71,32.88,14.4,16.3,74.48
+"Web_Browsing",48,-96.42,15.56,0.49,0.49,69.69
+"Background_Download",47,-98.15,56.98,547.87,548.94,60.11
+"Emergency_Service",47,-55.72,5.57,0.68,0.74,70.64
+"Streaming",47,-88.45,41.85,3.35,3.89,84.47
+"Video_Streaming",47,-92,38.85,2.94,3.31,70.32
+"VoIP_Call",46,-75.78,31.3,81.63,104.13,89.89
+"Online_Gaming",45,-63.16,29.11,4.14,4.46,80
+"IoT_Temperature",13,-98.85,102.15,3.85,5.15,70.38
+"File_Download",1,-75,45,2,2,70
+"Voice_Call",1,-80,20,100,120,80

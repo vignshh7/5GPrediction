@@ -1,0 +1,12 @@
+"Column_Name","Data_Type","Non_Missing","Missing","Unique_Values"
+"Timestamp","POSIXct",400,0,7
+"User_ID","character",400,0,400
+"Application_Type","character",400,0,11
+"Signal_Strength","numeric",400,0,51
+"Latency","numeric",400,0,87
+"Required_Bandwidth","numeric",400,0,175
+"Allocated_Bandwidth","numeric",400,0,179
+"Resource_Allocation","numeric",400,0,9
+"Hour","integer",400,0,1
+"DayOfWeek","ordered",400,0,1
+"IsWeekend","numeric",400,0,1
