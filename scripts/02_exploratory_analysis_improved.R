@@ -44,7 +44,7 @@ if (!dir.exists("visualizations/eda")) dir.create("visualizations/eda")
 # STEP 1: Load Cleaned Data
 # ============================================================================
 
-cat("STEP 1: Loading cleaned data...\n")
+# cat("STEP  Loading cleaned data...\n")
 
 if (!file.exists("data/processed/cleaned_data.csv")) {
   stop("Cleaned data not found! Please run 01_data_preprocessing.R first.")
@@ -57,7 +57,7 @@ cat(paste("✓ Loaded", nrow(df), "records\n\n"))
 # STEP 2: Univariate Analysis - IMPROVED
 # ============================================================================
 
-cat("STEP 2: Creating enhanced univariate analysis plots...\n")
+# cat("STEP  Creating enhanced univariate analysis plots...\n")
 
 # 1. Signal Strength Distribution - Enhanced
 p1 <- ggplot(df, aes(x = Signal_Strength)) +
@@ -134,7 +134,7 @@ cat("✓ Univariate analysis plots saved\n\n")
 # STEP 3: Application Type Analysis - IMPROVED
 # ============================================================================
 
-cat("STEP 3: Creating enhanced application type analysis...\n")
+# cat("STEP  Creating enhanced application type analysis...\n")
 
 # Prepare data
 app_summary <- df %>%
@@ -213,7 +213,7 @@ cat("✓ Application type analysis plots saved\n\n")
 # STEP 4: Bivariate Analysis - IMPROVED
 # ============================================================================
 
-cat("STEP 4: Creating enhanced bivariate analysis plots...\n")
+# cat("STEP  Creating enhanced bivariate analysis plots...\n")
 
 # 7. Signal vs Latency Scatter Plot - Enhanced
 p7 <- ggplot(df, aes(x = Signal_Strength, y = Latency)) +
@@ -268,7 +268,7 @@ cat("✓ Bivariate analysis plots saved\n\n")
 # STEP 5: Correlation Analysis - IMPROVED
 # ============================================================================
 
-cat("STEP 5: Creating enhanced correlation analysis...\n")
+# cat("STEP  Creating enhanced correlation analysis...\n")
 
 # Select numeric columns for correlation
 numeric_cols <- df %>% 
@@ -325,21 +325,21 @@ p11 <- ggplot(cor_melted, aes(Var1, Var2, fill = value)) +
 print(p11)
 dev.off()
 
-cat("✓ Correlation analysis plots saved\n\n")
+cat("✓ Correlation analysis plots saved\n")
 
-# Print key correlations
-cat("Key Correlations:\n")
-cor_melted_sorted <- cor_melted %>%
-  filter(Var1 != Var2) %>%
-  arrange(desc(abs(value))) %>%
-  head(10)
-print(cor_melted_sorted)
+# # Print key correlations
+# cat("Key Correlations:\n")
+# cor_melted_sorted <- cor_melted %>%
+#   filter(Var1 != Var2) %>%
+#   arrange(desc(abs(value))) %>%
+#   head(10)
+# print(cor_melted_sorted)
 
 # ============================================================================
 # STEP 6: Time-based Analysis - IMPROVED
 # ============================================================================
 
-cat("\nSTEP 6: Creating time-based analysis...\n")
+# cat("\nSTEP 6: Creating time-based analysis...\n")
 
 if ("Hour" %in% names(df)) {
   hourly_stats <- df %>%
@@ -389,7 +389,7 @@ if ("Hour" %in% names(df)) {
 # STEP 7: Summary Dashboard - IMPROVED
 # ============================================================================
 
-cat("STEP 7: Creating enhanced summary dashboard...\n")
+# cat("STEP  Creating enhanced summary dashboard...\n")
 
 # Create 4 summary panels
 summary_p1 <- ggplot(df, aes(x = Signal_Strength)) +
@@ -435,7 +435,7 @@ cat("✓ Summary dashboard created\n\n")
 # STEP 8: Generate Statistical Summary
 # ============================================================================
 
-cat("STEP 8: Generating statistical summary...\n")
+# cat("STEP  Generating statistical summary...\n")
 
 # Application-wise summary
 app_summary_detailed <- df %>%
@@ -452,25 +452,11 @@ app_summary_detailed <- df %>%
 
 write.csv(app_summary_detailed, "data/processed/application_summary.csv", row.names = FALSE)
 
-cat("\nApplication-wise Summary:\n")
-print(app_summary_detailed, n = Inf)
+# cat("\nApplication-wise Summary:\n")
+# print(app_summary_detailed, n = Inf)
 
 # ============================================================================
 # COMPLETION
 # ============================================================================
 
-cat("\n========================================\n")
-cat("EXPLORATORY DATA ANALYSIS COMPLETED!\n")
-cat("========================================\n\n")
-
-cat("Output Files:\n")
-cat("  - 14 visualization plots in visualizations/eda/\n")
-cat("  - data/processed/application_summary.csv\n\n")
-
-cat("Key Insights:\n")
-cat(paste("  - Average Signal Strength:", round(mean(df$Signal_Strength), 2), "dBm\n"))
-cat(paste("  - Average Latency:", round(mean(df$Latency), 2), "ms\n"))
-cat(paste("  - Average Resource Allocation:", round(mean(df$Resource_Allocation), 2), "%\n"))
-cat(paste("  - Total Application Types:", length(unique(df$Application_Type)), "\n"))
-
-cat("\nYou can now run: source('03_feature_engineering.R')\n\n")
+cat("✓ EDA completed: 14 plots saved, application summary generated\n")

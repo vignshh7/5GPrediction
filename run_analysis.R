@@ -18,23 +18,30 @@ suppressMessages(suppressWarnings({
   }
 }))
 
-# Pipeline
+# Pipeline - Complete ordered sequence
 pipeline_steps <- list(
-  list(name = "Data Preprocessing", script = "scripts/01_data_preprocessing.R"),
-  list(name = "Feature Engineering", script = "scripts/03_feature_engineering.R"),
-  list(name = "Model Training & Prediction", script = "scripts/04_model_training_clean.R")
+  list(name = "Data Preprocessing", script = "scripts/01_data_preprocessing.R", number = "01"),
+  list(name = "Exploratory Data Analysis", script = "scripts/02_exploratory_analysis_improved.R", number = "02"),
+  list(name = "Feature Engineering", script = "scripts/03_feature_engineering.R", number = "03"),
+  list(name = "Model Training", script = "scripts/04_model_training_clean.R", number = "04"),
+  list(name = "Prediction & Evaluation", script = "scripts/05_prediction_system.R", number = "05")
 )
 
-# Execute
+# Execute with detailed output
 for (i in seq_along(pipeline_steps)) {
   step <- pipeline_steps[[i]]
   
-  suppressWarnings({
-    tryCatch({
-      source(step$script, echo = FALSE)
-    }, error = function(e) {
-      cat(paste("✗ Error in", step$name, ":", e$message, "\n"))
-    })
+  cat("\n")
+  cat("════════════════════════════════════════\n")
+  cat(paste("STEP", step$number, ":", toupper(step$name), "\n"))
+  cat("════════════════════════════════════════\n")
+  
+  tryCatch({
+    source(step$script, echo = FALSE)
+    cat(paste("\n✓ Step", step$number, "completed successfully\n"))
+  }, error = function(e) {
+    cat(paste("\n✗ Error in Step", step$number, "-", step$name, ":", e$message, "\n"))
+    cat("Continuing to next step...\n")
   })
 }
 

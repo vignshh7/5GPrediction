@@ -1,32 +1,68 @@
 # ============================================================================
-# Script 06: Real-time Prediction System for 5G Network Congestion
-# ============================================================================
-# Purpose: Provide real-time congestion prediction and risk assessment
-# Author: PDS Course Project
-# Date: October 2025
+# Script 05: Prediction & Evaluation System
 # ============================================================================
 
 cat("\n========================================\n")
-cat("SCRIPT 06: PREDICTION SYSTEM\n")
+cat("PREDICTION & EVALUATION\n")
 cat("========================================\n\n")
 
-# Load required libraries
 suppressMessages({
   library(randomForest)
   library(dplyr)
 })
 
-# ============================================================================
-# Load Trained Models and Metadata
-# ============================================================================
-
-cat("Loading trained models...\n")
-
-# Load models
+# Load model and test data
+cat("Loading trained model...\n")
 rf_model <- readRDS("models/random_forest_model.rds")
+test_data <- read.csv("data/processed/test_data.csv", stringsAsFactors = FALSE)
 feature_metadata <- readRDS("data/processed/feature_metadata.rds")
 
-cat("✓ Models loaded successfully\n\n")
+test_data$Congestion_Risk <- suppressWarnings(as.factor(test_data$Congestion_Risk))
+
+# Make predictions
+cat("Generating predictions on test data...\n")
+predictions <- predict(rf_model, test_data, type = "prob")
+pred_class <- predict(rf_model, test_data)
+
+# Calculate risk scores and alert levels
+risk_scores <- suppressWarnings(predictions[, "1"] * 100)
+
+alert_levels <- suppressWarnings(cut(risk_scores,
+                    breaks = c(-Inf, 25, 50, 75, Inf),
+                    labels = c("LOW", "MEDIUM", "HIGH", "CRITICAL")))
+
+# Create results
+results <- data.frame(
+  Actual = test_data$Congestion_Risk,
+  Predicted = pred_class,
+  Risk_Score = round(risk_scores, 2),
+  Alert_Level = alert_levels,
+  Correct = test_data$Congestion_Risk == pred_class
+)
+
+write.csv(results, "models/test_predictions.csv", row.names = FALSE)
+
+# Display results
+cat("\n")
+cat("PREDICTION RESULTS:\n")
+cat("─────────────────────────────────────────\n")
+
+accuracy <- mean(results$Correct) * 100
+cat(paste("Accuracy:", round(accuracy, 2), "%\n"))
+cat(paste("Total Predictions:", nrow(results), "\n"))
+
+alert_summary <- table(results$Alert_Level)
+cat("\nAlert Level Distribution:\n")
+for(level in names(alert_summary)) {
+  cat(paste("  ", level, ":", alert_summary[level], "\n"))
+}
+
+cat("\nSample Predictions:\n")
+cat("─────────────────────────────────────────\n")
+print(head(results[, c("Predicted", "Risk_Score", "Alert_Level")], 10))
+
+cat("\n✓ Predictions complete\n")
+cat("✓ Results saved: models/test_predictions.csv\n\n")
 
 # ============================================================================
 # Prediction Function
@@ -191,60 +227,7 @@ batch_predict <- function(data_file) {
 }
 
 # ============================================================================
-# Example Usage
+# Example Usage (Commented out for clean pipeline execution)
 # ============================================================================
 
-cat("Prediction System Ready!\n\n")
-cat("Example Usage:\n")
-cat("──────────────────────────────────────────────────────\n\n")
-cat("# Create sample observation\n")
-cat("new_obs <- data.frame(\n")
-cat("  Signal_Strength = -75,\n")
-cat("  Latency = 45,\n")
-cat("  Required_Bandwidth = 10,\n")
-cat("  Allocated_Bandwidth = 8,\n")
-cat("  Resource_Allocation = 85\n")
-cat(")\n\n")
-cat("# Get prediction\n")
-cat("result <- predict_congestion(new_obs)\n")
-cat("print(result)\n\n")
-
-# Demo prediction
-cat("Running Demo Prediction:\n")
-cat("──────────────────────────────────────────────────────\n\n")
-
-demo_data <- data.frame(
-  Signal_Strength = -75,
-  Latency = 45,
-  Required_Bandwidth = 10,
-  Allocated_Bandwidth = 8,
-  Resource_Allocation = 85
-)
-
-demo_result <- predict_congestion(demo_data)
-
-cat("Input Metrics:\n")
-cat(paste("  Signal Strength:", demo_data$Signal_Strength, "dBm\n"))
-cat(paste("  Latency:", demo_data$Latency, "ms\n"))
-cat(paste("  Required Bandwidth:", demo_data$Required_Bandwidth, "Mbps\n"))
-cat(paste("  Allocated Bandwidth:", demo_data$Allocated_Bandwidth, "Mbps\n"))
-cat(paste("  Resource Allocation:", demo_data$Resource_Allocation, "%\n\n"))
-
-cat("Prediction Results:\n")
-cat(paste("  Congestion Predicted:", demo_result$congestion_predicted, "\n"))
-cat(paste("  Risk Score:", demo_result$risk_score, "/ 100\n"))
-cat(paste("  Alert Level:", demo_result$alert_level, "\n"))
-cat(paste("  QoS Score:", demo_result$key_metrics$qos_score, "\n\n"))
-
-cat("Recommendations:\n")
-for (rec in demo_result$recommendations) {
-  cat(paste("  ", rec, "\n"))
-}
-
-cat("\n")
-cat("========================================\n")
-cat("PREDICTION SYSTEM LOADED!\n")
-cat("========================================\n")
-cat("\nFunctions available:\n")
-cat("  - predict_congestion(new_data)\n")
-cat("  - batch_predict(data_file)\n\n")
+# cat("✓ Prediction system loaded\n")
