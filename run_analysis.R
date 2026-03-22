@@ -21,7 +21,7 @@ suppressMessages(suppressWarnings({
 # Pipeline - Complete ordered sequence
 pipeline_steps <- list(
   list(name = "Data Preprocessing", script = "scripts/01_data_preprocessing.R", number = "01"),
-  list(name = "Exploratory Data Analysis", script = "scripts/02_exploratory_analysis_improved.R", number = "02"),
+  list(name = "Exploratory Data Analysis", script = "scripts/02_exploratory_analysis.R", number = "02"),
   list(name = "Feature Engineering", script = "scripts/03_feature_engineering.R", number = "03"),
   list(name = "Model Training", script = "scripts/04_model_training_clean.R", number = "04"),
   list(name = "Prediction & Evaluation", script = "scripts/05_prediction_system.R", number = "05")

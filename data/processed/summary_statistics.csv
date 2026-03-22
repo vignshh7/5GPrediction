@@ -4,5 +4,5 @@
 "Required_Bandwidth",0,4,77.5735,690,178.382278382277
 "Allocated_Bandwidth",0,4.4,80.805,690,178.881246854416
 "Resource_Allocation",50,70,74.7125,90,8.98229077791671
-"Hour",10,10,10,10,0
-"IsWeekend",1,1,1,1,0
+"Hour",NA,NA,NA,NA,NA
+"IsWeekend",0,0,0,0,0

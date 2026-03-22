@@ -36,6 +36,26 @@ theme_custom <- function() {
     )
 }
 
+safe_min <- function(x) {
+  if (all(is.na(x))) NA_real_ else min(x, na.rm = TRUE)
+}
+
+safe_max <- function(x) {
+  if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE)
+}
+
+safe_mean <- function(x) {
+  if (all(is.na(x))) NA_real_ else mean(x, na.rm = TRUE)
+}
+
+safe_median <- function(x) {
+  if (all(is.na(x))) NA_real_ else median(x, na.rm = TRUE)
+}
+
+safe_quantile <- function(x, prob) {
+  if (all(is.na(x))) NA_real_ else quantile(x, prob, na.rm = TRUE)
+}
+
 # Create visualization directory
 if (!dir.exists("visualizations")) dir.create("visualizations")
 if (!dir.exists("visualizations/eda")) dir.create("visualizations/eda")
@@ -66,13 +86,13 @@ p1 <- ggplot(df, aes(x = Signal_Strength)) +
              color = "#e74c3c", linetype = "dashed", linewidth = 1.2) +
   geom_vline(aes(xintercept = median(Signal_Strength)), 
              color = "#27ae60", linetype = "dotted", linewidth = 1.2) +
-  annotate("text", x = mean(df$Signal_Strength) - 5, y = Inf, 
-           label = paste("Mean:", round(mean(df$Signal_Strength), 1), "dBm"),
+  annotate("text", x = safe_mean(df$Signal_Strength) - 5, y = Inf, 
+           label = paste("Mean:", round(safe_mean(df$Signal_Strength), 1), "dBm"),
            vjust = 2, hjust = 1, color = "#e74c3c", fontface = "bold", size = 4) +
   labs(title = "Signal Strength Distribution",
        subtitle = sprintf("Range: %.1f to %.1f dBm | Median: %.1f dBm", 
-                         min(df$Signal_Strength), max(df$Signal_Strength), 
-                         median(df$Signal_Strength)),
+                         safe_min(df$Signal_Strength), safe_max(df$Signal_Strength), 
+                         safe_median(df$Signal_Strength)),
        x = "Signal Strength (dBm)", 
        y = "Frequency (Number of Connections)") +
   theme_custom()
@@ -85,17 +105,17 @@ p2 <- ggplot(df, aes(x = Latency)) +
   geom_histogram(bins = 35, fill = "#2ecc71", color = "#27ae60", alpha = 0.8, linewidth = 0.3) +
   geom_vline(aes(xintercept = mean(Latency)), 
              color = "#e74c3c", linetype = "dashed", linewidth = 1.2) +
-  geom_vline(aes(xintercept = quantile(Latency, 0.75)), 
+  geom_vline(aes(xintercept = quantile(Latency, 0.75, na.rm = TRUE)), 
              color = "#f39c12", linetype = "dashed", linewidth = 1.2) +
-  annotate("text", x = mean(df$Latency), y = Inf, 
-           label = paste("Mean:", round(mean(df$Latency), 1), "ms"),
+  annotate("text", x = safe_mean(df$Latency), y = Inf, 
+           label = paste("Mean:", round(safe_mean(df$Latency), 1), "ms"),
            vjust = 2, hjust = -0.1, color = "#e74c3c", fontface = "bold", size = 4) +
-  annotate("text", x = quantile(df$Latency, 0.75), y = Inf, 
-           label = paste("75th %ile:", round(quantile(df$Latency, 0.75), 1), "ms"),
+  annotate("text", x = safe_quantile(df$Latency, 0.75), y = Inf, 
+           label = paste("75th %ile:", round(safe_quantile(df$Latency, 0.75), 1), "ms"),
            vjust = 4, hjust = -0.1, color = "#f39c12", fontface = "bold", size = 4) +
   labs(title = "Latency Distribution",
        subtitle = sprintf("Range: %.1f to %.1f ms | 75th Percentile: %.1f ms (Congestion Threshold)", 
-                         min(df$Latency), max(df$Latency), quantile(df$Latency, 0.75)),
+                         safe_min(df$Latency), safe_max(df$Latency), safe_quantile(df$Latency, 0.75)),
        x = "Latency (milliseconds)", 
        y = "Frequency (Number of Connections)") +
   theme_custom()
@@ -110,16 +130,16 @@ p3 <- ggplot(df, aes(x = Resource_Allocation)) +
              color = "#2c3e50", linetype = "dashed", linewidth = 1.2) +
   geom_vline(aes(xintercept = 80), 
              color = "#c0392b", linetype = "dashed", linewidth = 1.2) +
-  annotate("text", x = mean(df$Resource_Allocation), y = Inf, 
-           label = paste("Mean:", round(mean(df$Resource_Allocation), 1), "%"),
+  annotate("text", x = safe_mean(df$Resource_Allocation), y = Inf, 
+           label = paste("Mean:", round(safe_mean(df$Resource_Allocation), 1), "%"),
            vjust = 2, hjust = -0.1, color = "#2c3e50", fontface = "bold", size = 4) +
   annotate("text", x = 80, y = Inf, 
            label = "Congestion\nThreshold: 80%",
            vjust = 4, hjust = -0.1, color = "#c0392b", fontface = "bold", size = 4) +
   labs(title = "Resource Allocation Distribution",
        subtitle = sprintf("Range: %.0f%% to %.0f%% | Mean: %.1f%%", 
-                         min(df$Resource_Allocation), max(df$Resource_Allocation), 
-                         mean(df$Resource_Allocation)),
+                         safe_min(df$Resource_Allocation), safe_max(df$Resource_Allocation), 
+                         safe_mean(df$Resource_Allocation)),
        x = "Resource Allocation (%)", 
        y = "Frequency (Number of Connections)") +
   scale_x_continuous(breaks = seq(50, 90, by = 10)) +
@@ -235,14 +255,18 @@ p8 <- ggplot(df, aes(x = Required_Bandwidth, y = Allocated_Bandwidth)) +
   geom_point(alpha = 0.5, size = 2.5, color = "#9b59b6") +
   geom_abline(intercept = 0, slope = 1, color = "#e74c3c", linetype = "dashed", linewidth = 1.2) +
   geom_smooth(method = "lm", color = "#27ae60", linewidth = 1.5, se = TRUE, alpha = 0.2, formula = y ~ x) +
-  annotate("text", x = max(df$Required_Bandwidth) * 0.7, y = max(df$Required_Bandwidth) * 0.7, 
-           label = "Perfect\nAllocation", color = "#e74c3c", fontface = "bold", size = 4) +
   labs(title = "Required vs Allocated Bandwidth",
        subtitle = sprintf("Correlation: %.4f | Network allocates appropriately", 
                          cor(df$Required_Bandwidth, df$Allocated_Bandwidth)),
        x = "Required Bandwidth (Mbps)", 
        y = "Allocated Bandwidth (Mbps)") +
   theme_custom()
+
+required_max <- safe_max(df$Required_Bandwidth)
+if (!is.na(required_max)) {
+  p8 <- p8 + annotate("text", x = required_max * 0.7, y = required_max * 0.7, 
+                      label = "Perfect\nAllocation", color = "#e74c3c", fontface = "bold", size = 4)
+}
 
 ggsave("visualizations/eda/08_required_vs_allocated_bandwidth.png", p8, 
        width = 12, height = 7, dpi = 300, bg = "white")
@@ -343,44 +367,51 @@ cat("✓ Correlation analysis plots saved\n")
 
 if ("Hour" %in% names(df)) {
   hourly_stats <- df %>%
+    filter(!is.na(Hour)) %>%
     group_by(Hour) %>%
     summarise(
       Avg_Latency = mean(Latency, na.rm = TRUE),
       Avg_Resource = mean(Resource_Allocation, na.rm = TRUE),
       Count = n()
     )
-  
-  # 12. Latency by Hour
-  p12 <- ggplot(hourly_stats, aes(x = Hour)) +
-    geom_line(aes(y = Avg_Latency), color = "#3498db", linewidth = 2) +
-    geom_point(aes(y = Avg_Latency), color = "#2c3e50", size = 4) +
-    geom_hline(yintercept = mean(df$Latency), linetype = "dashed", color = "#e74c3c", linewidth = 1) +
-    labs(title = "Average Latency by Hour of Day",
-         subtitle = "Hourly trend analysis (dashed line = overall mean)",
-         x = "Hour of Day", 
-         y = "Average Latency (ms)") +
-    scale_x_continuous(breaks = unique(hourly_stats$Hour)) +
-    theme_custom()
-  
-  ggsave("visualizations/eda/12_latency_by_hour.png", p12, 
-         width = 12, height = 7, dpi = 300, bg = "white")
-  
-  # 13. Resource by Hour
-  p13 <- ggplot(hourly_stats, aes(x = Hour)) +
-    geom_line(aes(y = Avg_Resource), color = "#e67e22", linewidth = 2) +
-    geom_point(aes(y = Avg_Resource), color = "#d35400", size = 4) +
-    geom_hline(yintercept = 80, linetype = "dashed", color = "#c0392b", linewidth = 1) +
-    labs(title = "Average Resource Allocation by Hour of Day",
-         subtitle = "Hourly utilization pattern (dashed line = congestion threshold)",
-         x = "Hour of Day", 
-         y = "Average Resource Allocation (%)") +
-    scale_x_continuous(breaks = unique(hourly_stats$Hour)) +
-    theme_custom()
-  
-  ggsave("visualizations/eda/13_resource_by_hour.png", p13, 
-         width = 12, height = 7, dpi = 300, bg = "white")
-  
-  cat("✓ Time-based analysis plots saved\n\n")
+
+  if (nrow(hourly_stats) == 0) {
+    cat("⚠ No valid hour values found, skipping time-based analysis\n\n")
+  } else {
+    hour_breaks <- sort(unique(hourly_stats$Hour))
+
+    # 12. Latency by Hour
+    p12 <- ggplot(hourly_stats, aes(x = Hour)) +
+      geom_line(aes(y = Avg_Latency), color = "#3498db", linewidth = 2) +
+      geom_point(aes(y = Avg_Latency), color = "#2c3e50", size = 4) +
+      geom_hline(yintercept = mean(df$Latency), linetype = "dashed", color = "#e74c3c", linewidth = 1) +
+      labs(title = "Average Latency by Hour of Day",
+           subtitle = "Hourly trend analysis (dashed line = overall mean)",
+           x = "Hour of Day", 
+           y = "Average Latency (ms)") +
+      scale_x_continuous(breaks = hour_breaks) +
+      theme_custom()
+
+    ggsave("visualizations/eda/12_latency_by_hour.png", p12, 
+           width = 12, height = 7, dpi = 300, bg = "white")
+
+    # 13. Resource by Hour
+    p13 <- ggplot(hourly_stats, aes(x = Hour)) +
+      geom_line(aes(y = Avg_Resource), color = "#e67e22", linewidth = 2) +
+      geom_point(aes(y = Avg_Resource), color = "#d35400", size = 4) +
+      geom_hline(yintercept = 80, linetype = "dashed", color = "#c0392b", linewidth = 1) +
+      labs(title = "Average Resource Allocation by Hour of Day",
+           subtitle = "Hourly utilization pattern (dashed line = congestion threshold)",
+           x = "Hour of Day", 
+           y = "Average Resource Allocation (%)") +
+      scale_x_continuous(breaks = hour_breaks) +
+      theme_custom()
+
+    ggsave("visualizations/eda/13_resource_by_hour.png", p13, 
+           width = 12, height = 7, dpi = 300, bg = "white")
+
+    cat("✓ Time-based analysis plots saved\n\n")
+  }
 } else {
   cat("⚠ No time features found, skipping time-based analysis\n\n")
 }

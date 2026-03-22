@@ -37,6 +37,11 @@ if (!file.exists(dataset_path)) {
 }
 
 if (!file.exists(dataset_path)) {
+  # Use the raw backup inside the repo
+  dataset_path <- "data/raw/original_data.csv"
+}
+
+if (!file.exists(dataset_path)) {
   stop("Dataset not found! Please ensure the dataset is in the parent directory.")
 }
 
@@ -75,7 +80,10 @@ if (sum(missing_summary) > 0) {
       if (is.numeric(df[[col]])) {
         df[[col]][is.na(df[[col]])] <- median(df[[col]], na.rm = TRUE)
       } else {
-        df[[col]][is.na(df[[col]])] <- names(sort(table(df[[col]]), decreasing = TRUE))[1]
+        mode_table <- sort(table(df[[col]]), decreasing = TRUE)
+        if (length(mode_table) > 0) {
+          df[[col]][is.na(df[[col]])] <- names(mode_table)[1]
+        }
       }
     }
   }
@@ -122,13 +130,19 @@ write.csv(data_dictionary, "data/processed/data_dictionary.csv", row.names = FAL
 
 # Generate summary statistics
 numeric_data <- df[sapply(df, is.numeric)]
+safe_min <- function(x) if (all(is.na(x))) NA_real_ else min(x, na.rm = TRUE)
+safe_max <- function(x) if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE)
+safe_mean <- function(x) if (all(is.na(x))) NA_real_ else mean(x, na.rm = TRUE)
+safe_median <- function(x) if (all(is.na(x))) NA_real_ else median(x, na.rm = TRUE)
+safe_sd <- function(x) if (all(is.na(x))) NA_real_ else sd(x, na.rm = TRUE)
+
 summary_stats <- data.frame(
   Variable = names(numeric_data),
-  Min = sapply(numeric_data, min, na.rm = TRUE),
-  Median = sapply(numeric_data, median, na.rm = TRUE),
-  Mean = sapply(numeric_data, mean, na.rm = TRUE),
-  Max = sapply(numeric_data, max, na.rm = TRUE),
-  SD = sapply(numeric_data, sd, na.rm = TRUE),
+  Min = sapply(numeric_data, safe_min),
+  Median = sapply(numeric_data, safe_median),
+  Mean = sapply(numeric_data, safe_mean),
+  Max = sapply(numeric_data, safe_max),
+  SD = sapply(numeric_data, safe_sd),
   row.names = NULL
 )
 
